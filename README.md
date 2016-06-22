@@ -2,7 +2,7 @@
 
 The `comutil` library provides additional API and type support for interacting
 with the component object model runtime in Windows, beyond that which is
-supplied by the [go-ole library](https://github.com/go-ole).
+supplied by the [go-ole library](https://github.com/go-ole/go-ole).
 
 In particular, this library enables the creation of COM instances that
 communicate directly with remote servers.
