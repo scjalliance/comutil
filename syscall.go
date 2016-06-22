@@ -18,6 +18,10 @@ var (
 // CreateInstanceEx supports remote creation of multiple interfaces within one
 // class.
 //
+// This is a low-level function. Use of the higher level object creation
+// functions like CreateObject and CreateRemoteObject are recommended unless
+// specific creation parameters are required.
+//
 // MSDN: https://msdn.microsoft.com/library/ms680701
 func CreateInstanceEx(clsid *ole.GUID, context uint, serverInfo *CoServerInfo, results []MultiQI) (err error) {
 	var _p0 *MultiQI
