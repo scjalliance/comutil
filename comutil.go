@@ -1,6 +1,10 @@
 package comutil
 
-import "github.com/go-ole/go-ole"
+import (
+	"unsafe"
+
+	"github.com/go-ole/go-ole"
+)
 
 // CreateObject supports local creation of a single component object
 // model interface. The class identified by the given class ID will be asked to
@@ -77,4 +81,20 @@ func CreateRemoteObject(server string, clsid *ole.GUID, iid *ole.GUID) (iface *o
 		err = ErrCreationFailed
 	}
 	return
+}
+
+// SafeArrayFromStringSlice creats a SafeArray from the given slice of strings.
+//
+// See http://www.roblocher.com/whitepapers/oletypes.html
+func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
+	array, _ := SafeArrayCreateVector(ole.VT_BSTR, 0, uint32(len(slice)))
+
+	if array == nil {
+		panic("Could not convert []string to SAFEARRAY")
+	}
+	// SysAllocStringLen(s)
+	for i, v := range slice {
+		SafeArrayPutElement(array, int64(i), uintptr(unsafe.Pointer(ole.SysAllocStringLen(v))))
+	}
+	return array
 }

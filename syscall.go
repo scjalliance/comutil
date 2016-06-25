@@ -8,12 +8,15 @@ import (
 )
 
 var (
-	modole32, _ = syscall.LoadDLL("ole32.dll")
+	modole32, _    = syscall.LoadDLL("ole32.dll")
+	modoleaut32, _ = syscall.LoadDLL("oleaut32.dll")
 )
 
 var (
-	procCoCreateInstanceEx, _ = modole32.FindProc("CoCreateInstanceEx")
-	procIIDFromString, _      = modole32.FindProc("IIDFromString")
+	procCoCreateInstanceEx, _    = modole32.FindProc("CoCreateInstanceEx")
+	procIIDFromString, _         = modole32.FindProc("IIDFromString")
+	procSafeArrayCreateVector, _ = modoleaut32.FindProc("SafeArrayCreateVector")
+	procSafeArrayPutElement, _   = modoleaut32.FindProc("SafeArrayPutElement")
 )
 
 // CreateInstanceEx supports remote creation of multiple interfaces within one
@@ -61,6 +64,33 @@ func IIDFromString(value string) (iid *ole.GUID, err error) {
 	hr, _, _ := procIIDFromString.Call(
 		uintptr(unsafe.Pointer(bvalue)),
 		uintptr(unsafe.Pointer(iid)))
+	if hr != 0 {
+		err = ole.NewError(hr)
+	}
+	return
+}
+
+// SafeArrayCreateVector creates SafeArray.
+//
+// AKA: SafeArrayCreateVector in Windows API.
+func SafeArrayCreateVector(variantType ole.VT, lowerBound int32, length uint32) (safearray *ole.SafeArray, err error) {
+	sa, _, err := procSafeArrayCreateVector.Call(
+		uintptr(variantType),
+		uintptr(lowerBound),
+		uintptr(length))
+	safearray = (*ole.SafeArray)(unsafe.Pointer(uintptr(sa)))
+	return
+}
+
+// SafeArrayPutElement stores the data element at the specified location in the
+// array.
+//
+// AKA: SafeArrayPutElement in Windows API.
+func SafeArrayPutElement(safearray *ole.SafeArray, index int64, element uintptr) (err error) {
+	hr, _, _ := procSafeArrayPutElement.Call(
+		uintptr(unsafe.Pointer(safearray)),
+		uintptr(unsafe.Pointer(&index)),
+		uintptr(unsafe.Pointer(uintptr(element))))
 	if hr != 0 {
 		err = ole.NewError(hr)
 	}
