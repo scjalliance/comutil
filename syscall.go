@@ -16,7 +16,9 @@ var (
 	procCoCreateInstanceEx, _    = modole32.FindProc("CoCreateInstanceEx")
 	procIIDFromString, _         = modole32.FindProc("IIDFromString")
 	procSafeArrayCreateVector, _ = modoleaut32.FindProc("SafeArrayCreateVector")
+	procSafeArrayGetElement, _   = modoleaut32.FindProc("SafeArrayGetElement")
 	procSafeArrayPutElement, _   = modoleaut32.FindProc("SafeArrayPutElement")
+	procSafeArrayGetDim, _       = modoleaut32.FindProc("SafeArrayGetDim")
 )
 
 // CreateInstanceEx supports remote creation of multiple interfaces within one
@@ -82,17 +84,41 @@ func SafeArrayCreateVector(variantType ole.VT, lowerBound int32, length uint32) 
 	return
 }
 
+// SafeArrayGetElement stores the data element at the specified location in the
+// array.
+//
+// AKA: SafeArrayGetElement in Windows API.
+func SafeArrayGetElement(safearray *ole.SafeArray, index int64, element unsafe.Pointer) (err error) {
+	hr, _, _ := procSafeArrayGetElement.Call(
+		uintptr(unsafe.Pointer(safearray)),
+		uintptr(unsafe.Pointer(&index)),
+		uintptr(element))
+	if hr != 0 {
+		err = ole.NewError(hr)
+	}
+	return
+}
+
 // SafeArrayPutElement stores the data element at the specified location in the
 // array.
 //
 // AKA: SafeArrayPutElement in Windows API.
-func SafeArrayPutElement(safearray *ole.SafeArray, index int64, element uintptr) (err error) {
+func SafeArrayPutElement(safearray *ole.SafeArray, index int64, element unsafe.Pointer) (err error) {
 	hr, _, _ := procSafeArrayPutElement.Call(
 		uintptr(unsafe.Pointer(safearray)),
 		uintptr(unsafe.Pointer(&index)),
-		uintptr(unsafe.Pointer(uintptr(element))))
+		uintptr(element))
 	if hr != 0 {
 		err = ole.NewError(hr)
 	}
+	return
+}
+
+// SafeArrayGetDim returns the number of dimensions in the given safe array.
+//
+// AKA: SafeArrayGetDim in Windows API.
+func SafeArrayGetDim(safearray *ole.SafeArray) (dimensions uint32, err error) {
+	d, _, err := procSafeArrayGetDim.Call(uintptr(unsafe.Pointer(safearray)))
+	dimensions = uint32(d)
 	return
 }

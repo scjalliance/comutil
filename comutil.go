@@ -94,7 +94,7 @@ func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
 	}
 	// SysAllocStringLen(s)
 	for i, v := range slice {
-		SafeArrayPutElement(array, int64(i), uintptr(unsafe.Pointer(ole.SysAllocStringLen(v))))
+		SafeArrayPutElement(array, int64(i), unsafe.Pointer(ole.SysAllocStringLen(v)))
 	}
 	return array
 }
