@@ -15,6 +15,7 @@ var (
 var (
 	procCoCreateInstanceEx, _    = modole32.FindProc("CoCreateInstanceEx")
 	procIIDFromString, _         = modole32.FindProc("IIDFromString")
+	procSafeArrayCopy, _         = modoleaut32.FindProc("SafeArrayCopy")
 	procSafeArrayCreateVector, _ = modoleaut32.FindProc("SafeArrayCreateVector")
 	procSafeArrayGetElement, _   = modoleaut32.FindProc("SafeArrayGetElement")
 	procSafeArrayPutElement, _   = modoleaut32.FindProc("SafeArrayPutElement")
@@ -66,6 +67,19 @@ func IIDFromString(value string) (iid *ole.GUID, err error) {
 	hr, _, _ := procIIDFromString.Call(
 		uintptr(unsafe.Pointer(bvalue)),
 		uintptr(unsafe.Pointer(iid)))
+	if hr != 0 {
+		err = ole.NewError(hr)
+	}
+	return
+}
+
+// SafeArrayCopy returns a copy of the given SafeArray.
+//
+// AKA: SafeArrayCopy in Windows API.
+func SafeArrayCopy(original *ole.SafeArray) (duplicate *ole.SafeArray, err error) {
+	hr, _, _ := procSafeArrayCopy.Call(
+		uintptr(unsafe.Pointer(original)),
+		uintptr(unsafe.Pointer(&duplicate)))
 	if hr != 0 {
 		err = ole.NewError(hr)
 	}
