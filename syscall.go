@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/go-ole/go-ole"
+	"github.com/google/uuid"
 )
 
 var (
@@ -30,13 +31,13 @@ var (
 // specific creation parameters are required.
 //
 // MSDN: https://msdn.microsoft.com/library/ms680701
-func CreateInstanceEx(clsid *ole.GUID, context uint, serverInfo *CoServerInfo, results []MultiQI) (err error) {
+func CreateInstanceEx(clsid uuid.UUID, context uint, serverInfo *CoServerInfo, results []MultiQI) (err error) {
 	var _p0 *MultiQI
 	if len(results) > 0 {
 		_p0 = &results[0]
 	}
 	hr, _, _ := procCoCreateInstanceEx.Call(
-		uintptr(unsafe.Pointer(clsid)),
+		uintptr(unsafe.Pointer(GUID(clsid))),
 		0,
 		uintptr(context),
 		uintptr(unsafe.Pointer(serverInfo)),

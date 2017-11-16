@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/go-ole/go-ole"
+	"github.com/google/uuid"
 )
 
 // CreateObject supports local creation of a single component object
@@ -14,13 +15,13 @@ import (
 //
 // It is the caller's responsibility to cast the returned interface to the
 // correct type. This is typically done with an unsafe pointer cast.
-func CreateObject(clsid *ole.GUID, iid *ole.GUID) (iface *ole.IUnknown, err error) {
+func CreateObject(clsid uuid.UUID, iid uuid.UUID) (iface *ole.IUnknown, err error) {
 	serverInfo := &CoServerInfo{}
 
 	var context uint = ole.CLSCTX_SERVER
 
 	results := make([]MultiQI, 0, 1)
-	results = append(results, MultiQI{IID: iid})
+	results = append(results, MultiQI{IID: GUID(iid)})
 
 	err = CreateInstanceEx(clsid, context, serverInfo, results)
 	if err != nil {
@@ -46,7 +47,7 @@ func CreateObject(clsid *ole.GUID, iid *ole.GUID) (iface *ole.IUnknown, err erro
 //
 // It is the caller's responsibility to cast the returned interface to the
 // correct type. This is typically done with an unsafe pointer cast.
-func CreateRemoteObject(server string, clsid *ole.GUID, iid *ole.GUID) (iface *ole.IUnknown, err error) {
+func CreateRemoteObject(server string, clsid uuid.UUID, iid uuid.UUID) (iface *ole.IUnknown, err error) {
 	var bserver *int16
 	if len(server) > 0 {
 		bserver = ole.SysAllocStringLen(server)
@@ -68,7 +69,7 @@ func CreateRemoteObject(server string, clsid *ole.GUID, iid *ole.GUID) (iface *o
 	}
 
 	results := make([]MultiQI, 0, 1)
-	results = append(results, MultiQI{IID: iid})
+	results = append(results, MultiQI{IID: GUID(iid)})
 
 	err = CreateInstanceEx(clsid, context, serverInfo, results)
 	if err != nil {
