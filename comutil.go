@@ -199,9 +199,6 @@ func SafeArrayToConcreteSlice(array *ole.SafeArrayConversion) (value interface{}
 // representation. A slice of interface{} members will be returned.
 //
 // If the array does not contain variant members an error will be returned.
-
-// VariantArrayToValues attempts to convert the given safe array of variant
-// members to a native Go representation.
 func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface{}, err error) {
 	vt, elems, err := arrayDetails(array)
 	if err != nil {
