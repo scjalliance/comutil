@@ -104,33 +104,34 @@ func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
 // representation.
 func VariantToValue(variant *ole.VARIANT) (value interface{}, err error) {
 	if array := variant.ToArray(); array != nil {
-		return ArrayToValue(array)
+		return SafeArrayToSlice(array)
 	}
 	return variant.Value(), nil
 }
 
-// ArrayToValue attempts to convert the given safe array to a native Go
-// representation.
-func ArrayToValue(array *ole.SafeArrayConversion) (value interface{}, err error) {
+// SafeArrayToSlice converts the given array to a native Go representation. A
+// slice of appropriately typed elements will be returned.
+func SafeArrayToSlice(array *ole.SafeArrayConversion) (value interface{}, err error) {
 	vt, err := array.GetType()
 	if err != nil {
 		return
 	}
 
 	if ole.VT(vt) == ole.VT_VARIANT {
-		return VariantArrayToValues(array)
+		return SafeArrayToVariantSlice(array)
 	}
 
-	return SimpleArrayToValues(array)
+	return SafeArrayToConcreteSlice(array)
 }
 
-// SimpleArrayToValues attempts to convert the given safe array of non-variant
-// members to a native Go representation.
+// SafeArrayToConcreteSlice converts the given non-variant array to a native Go
+// representation. A slice of appropriately typed elements will be returned.
 //
-// The returned value will be a slice of elements of appropriate type.
+// If the array contains variant elements an error will be returned.
 //
-// Currently only arrays of bytes and integers are supported.
-func SimpleArrayToValues(array *ole.SafeArrayConversion) (value interface{}, err error) {
+// Only arrays of integers and bytes are supported. Support for additional
+// types may be added in the future.
+func SafeArrayToConcreteSlice(array *ole.SafeArrayConversion) (value interface{}, err error) {
 	vt, elems, err := arrayDetails(array)
 	if err != nil {
 		return
@@ -194,9 +195,14 @@ func SimpleArrayToValues(array *ole.SafeArrayConversion) (value interface{}, err
 	return
 }
 
+// SafeArrayToVariantSlice converts the given variant array to a native Go
+// representation. A slice of interface{} members will be returned.
+//
+// If the array does not contain variant members an error will be returned.
+
 // VariantArrayToValues attempts to convert the given safe array of variant
 // members to a native Go representation.
-func VariantArrayToValues(array *ole.SafeArrayConversion) (values []interface{}, err error) {
+func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface{}, err error) {
 	vt, elems, err := arrayDetails(array)
 	if err != nil {
 		return
