@@ -94,9 +94,13 @@ func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
 	if array == nil {
 		panic("Could not convert []string to SAFEARRAY")
 	}
-	// SysAllocStringLen(s)
 	for i, v := range slice {
-		SafeArrayPutElement(array, int64(i), unsafe.Pointer(ole.SysAllocStringLen(v)))
+		element := ole.SysAllocStringLen(v)
+		err := SafeArrayPutElement(array, int64(i), unsafe.Pointer(element))
+		ole.SysFreeString(element)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return array
 }
