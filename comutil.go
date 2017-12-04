@@ -85,7 +85,7 @@ func CreateRemoteObject(server string, clsid uuid.UUID, iid uuid.UUID) (iface *o
 	return
 }
 
-// SafeArrayFromStringSlice creats a SafeArray from the given slice of strings.
+// SafeArrayFromStringSlice creates a SafeArray from the given slice of strings.
 //
 // See http://www.roblocher.com/whitepapers/oletypes.html
 func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
