@@ -2,6 +2,7 @@ package comutil
 
 import (
 	"syscall"
+	"unicode/utf16"
 	"unsafe"
 
 	"github.com/go-ole/go-ole"
@@ -11,6 +12,7 @@ import (
 var (
 	modole32, _    = syscall.LoadDLL("ole32.dll")
 	modoleaut32, _ = syscall.LoadDLL("oleaut32.dll")
+	modactiveds, _ = syscall.LoadDLL("activeds.dll")
 )
 
 var (
@@ -21,6 +23,7 @@ var (
 	procSafeArrayGetElement, _   = modoleaut32.FindProc("SafeArrayGetElement")
 	procSafeArrayPutElement, _   = modoleaut32.FindProc("SafeArrayPutElement")
 	procSafeArrayGetDim, _       = modoleaut32.FindProc("SafeArrayGetDim")
+	procADsBuildVarArrayStr, _   = modactiveds.FindProc("ADsBuildVarArrayStr")
 )
 
 // CreateInstanceEx supports remote creation of multiple interfaces within one
@@ -135,5 +138,36 @@ func SafeArrayPutElement(safearray *ole.SafeArray, index int64, element unsafe.P
 func SafeArrayGetDim(safearray *ole.SafeArray) (dimensions uint32, err error) {
 	d, _, err := procSafeArrayGetDim.Call(uintptr(unsafe.Pointer(safearray)))
 	dimensions = uint32(d)
+	return
+}
+
+// BuildVarArrayStr returns a variant array of strings with values populated
+// by the given elements.
+//
+// AKA: ADsBuildVarArrayStr in Windows API.
+func BuildVarArrayStr(elements ...string) (v *ole.VARIANT, err error) {
+	v = &ole.VARIANT{}
+	err = ole.VariantInit(v)
+	if err != nil {
+		return
+	}
+
+	var ptr **uint16
+	if len(elements) > 0 {
+		array := make([]*uint16, len(elements))
+		for i := range elements {
+			u := utf16.Encode([]rune(elements[i] + "\x00"))
+			array[i] = &u[0]
+		}
+		ptr = &array[0]
+	}
+
+	hr, _, _ := procADsBuildVarArrayStr.Call(
+		uintptr(unsafe.Pointer(ptr)),
+		uintptr(len(elements)),
+		uintptr(unsafe.Pointer(v)))
+	if hr != 0 {
+		err = ole.NewError(hr)
+	}
 	return
 }
