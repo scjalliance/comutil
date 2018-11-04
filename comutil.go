@@ -107,6 +107,12 @@ func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
 
 // VariantToValue attempts to convert the given variant to a native Go
 // representation.
+//
+// If the value contains an IUnknown or IDispatch interface, it is the
+// caller's responsibility to release it.
+//
+// If the value contains an an array with IUnknown or IDispatch members,
+// it is the caller's responsibility to release them.
 func VariantToValue(variant *ole.VARIANT) (value interface{}, err error) {
 	if array := variant.ToArray(); array != nil {
 		return SafeArrayToSlice(array)
@@ -116,6 +122,9 @@ func VariantToValue(variant *ole.VARIANT) (value interface{}, err error) {
 
 // SafeArrayToSlice converts the given array to a native Go representation. A
 // slice of appropriately typed elements will be returned.
+//
+// If the array contains IUnknown or IDispatch members, it is the
+// caller's responsibility to release them.
 func SafeArrayToSlice(array *ole.SafeArrayConversion) (value interface{}, err error) {
 	vt, err := array.GetType()
 	if err != nil {
@@ -204,6 +213,9 @@ func SafeArrayToConcreteSlice(array *ole.SafeArrayConversion) (value interface{}
 // representation. A slice of interface{} members will be returned.
 //
 // If the array does not contain variant members an error will be returned.
+//
+// If the array contains IUnknown or IDispatch members, it is the
+// caller's responsibility to release them.
 func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface{}, err error) {
 	vt, elems, err := arrayDetails(array)
 	if err != nil {
@@ -229,6 +241,14 @@ func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface
 			}
 		} else {
 			values = append(values, value)
+		}
+		// When returning a pointer to a COM interface, add a reference
+		// so that VariantClear doesn't release the interface below.
+		switch v := value.(type) {
+		case *ole.IDispatch:
+			v.AddRef()
+		case *ole.IUnknown:
+			v.AddRef()
 		}
 		ole.VariantClear(element)
 	}
