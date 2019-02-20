@@ -96,7 +96,7 @@ func SafeArrayFromStringSlice(slice []string) *ole.SafeArray {
 	}
 	for i, v := range slice {
 		element := ole.SysAllocStringLen(v)
-		err := SafeArrayPutElement(array, int64(i), unsafe.Pointer(element))
+		err := SafeArrayPutElement(array, int32(i), unsafe.Pointer(element))
 		ole.SysFreeString(element)
 		if err != nil {
 			panic(err)
@@ -157,49 +157,49 @@ func SafeArrayToConcreteSlice(array *ole.SafeArrayConversion) (value interface{}
 	switch vt {
 	case ole.VT_UI1:
 		out := make([]byte, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_I1:
 		out := make([]int8, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_UI2:
 		out := make([]uint16, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_I2:
 		out := make([]int16, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_UI4:
 		out := make([]uint32, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_I4:
 		out := make([]int32, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_UI8:
 		out := make([]uint64, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
 	case ole.VT_I8:
 		out := make([]int64, elems)
-		for i := int64(0); i < elems; i++ {
+		for i := int32(0); i < elems; i++ {
 			copyArrayElement(array.Array, i, unsafe.Pointer(&out[i]), &err)
 		}
 		value = out
@@ -225,7 +225,7 @@ func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface
 		return nil, ErrNonVariantArray
 	}
 
-	for i := int64(0); i < elems; i++ {
+	for i := int32(0); i < elems; i++ {
 		element := &ole.VARIANT{}
 		ole.VariantInit(element)
 		err = SafeArrayGetElement(array.Array, i, unsafe.Pointer(element))
@@ -256,7 +256,7 @@ func SafeArrayToVariantSlice(array *ole.SafeArrayConversion) (values []interface
 	return
 }
 
-func arrayDetails(array *ole.SafeArrayConversion) (vt ole.VT, elems int64, err error) {
+func arrayDetails(array *ole.SafeArrayConversion) (vt ole.VT, elems int32, err error) {
 	_vt, err := array.GetType()
 	if err != nil {
 		return
@@ -273,7 +273,7 @@ func arrayDetails(array *ole.SafeArrayConversion) (vt ole.VT, elems int64, err e
 	return
 }
 
-func copyArrayElement(from *ole.SafeArray, index int64, to unsafe.Pointer, err *error) {
+func copyArrayElement(from *ole.SafeArray, index int32, to unsafe.Pointer, err *error) {
 	e := SafeArrayGetElement(from, index, to)
 	if e != nil && *err == nil {
 		*err = fmt.Errorf("unable to retrieve array element %d: %v", index, e)

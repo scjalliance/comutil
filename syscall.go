@@ -106,7 +106,7 @@ func SafeArrayCreateVector(variantType ole.VT, lowerBound int32, length uint32) 
 // array.
 //
 // AKA: SafeArrayGetElement in Windows API.
-func SafeArrayGetElement(safearray *ole.SafeArray, index int64, element unsafe.Pointer) (err error) {
+func SafeArrayGetElement(safearray *ole.SafeArray, index int32, element unsafe.Pointer) (err error) {
 	hr, _, _ := procSafeArrayGetElement.Call(
 		uintptr(unsafe.Pointer(safearray)),
 		uintptr(unsafe.Pointer(&index)),
@@ -121,7 +121,7 @@ func SafeArrayGetElement(safearray *ole.SafeArray, index int64, element unsafe.P
 // array.
 //
 // AKA: SafeArrayPutElement in Windows API.
-func SafeArrayPutElement(safearray *ole.SafeArray, index int64, element unsafe.Pointer) (err error) {
+func SafeArrayPutElement(safearray *ole.SafeArray, index int32, element unsafe.Pointer) (err error) {
 	hr, _, _ := procSafeArrayPutElement.Call(
 		uintptr(unsafe.Pointer(safearray)),
 		uintptr(unsafe.Pointer(&index)),
