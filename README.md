@@ -1,4 +1,5 @@
-# comutil
+comutil [![GoDoc](https://godoc.org/github.com/scjalliance/comutil?status.svg)](https://godoc.org/github.com/scjalliance/comutil)
+====
 
 The `comutil` library provides additional API and type support for interacting
 with the component object model runtime in Windows, beyond that which is
